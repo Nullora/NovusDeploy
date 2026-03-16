@@ -6,37 +6,43 @@
 #include<sstream>
 #include<vector>
 struct entry{
-    std::vector<std::string> srcs;
+    std::string src;
     std::vector<std::string> dests;
 };
+//init inotify for auto pushes (future update)
 int fd = inotify_init1(IN_CLOEXEC);
 std::unordered_map<int,entry> autoFiles;
+//manual files (updated with ndep update "tag")
 std::unordered_map<std::string,entry> manFiles;
+//watch file
 std::ifstream inW("/home/nullora/novusdeploy/.ndeploy/watched_files.nd");
 std::string lineW;
+std::string tag, src, destsStr;
 void saveFiles();
 int main(int argc, char* argv[]){
+    //load from watch file into manFiles.
     while(std::getline(inW,lineW)){
         if(!lineW.empty()){
             entry e;
             std::istringstream ss(lineW);
-            std::string tag, srcsStr, destsStr;
-            ss >> tag >> srcsStr >> destsStr;
-            std::istringstream sss(srcsStr);
-            std::string s;
-            while(std::getline(sss,s,',')) e.srcs.push_back(s);
+            std::string dest;
+            ss >> tag >> src >> destsStr;
             std::istringstream dss(destsStr);
-            std::string d;
-            while(std::getline(dss,d,',')) e.dests.push_back(d);
+            e.src = src;
+            while(std::getline(dss, dest, ',')){
+                e.dests.push_back(dest);
+            }
             manFiles[tag] = e;
         }
     }
-    if(argc < 3){ std::cout << "not enough args\n"; return 1; }
     std::string cmd = argv[1];
     std::string filepath = argv[2];
-    std::string tagC = (argc >= 4) ? argv[3] : "";
+    std::string tagC;
+    if(argc==4) tagC = argv[3];
     if(cmd=="add"){
-        manFiles[tagC].srcs.push_back(filepath);
+        entry e;
+        e.src = filepath;
+        manFiles[tagC] = e;
         saveFiles();
     }
     if(cmd=="add-d"){
@@ -49,8 +55,8 @@ int main(int argc, char* argv[]){
             return 1;
         }
         entry& e = manFiles[filepath];
-        for(int i = 0; i < e.srcs.size(); i++){
-            std::string cpCmd = "cp " + e.srcs[i] + " " + e.dests[i];
+        for(auto& dest : e.dests){
+            std::string cpCmd = "cp " + e.src + " " + dest;
             system(cpCmd.c_str());
         }
         std::cout<<"deployed " << filepath << " to " << e.dests.size() << " destinations\n";
@@ -59,12 +65,7 @@ int main(int argc, char* argv[]){
 void saveFiles(){
     std::ofstream out("/home/nullora/novusdeploy/.ndeploy/watched_files.nd", std::ios::trunc);
     for(auto& [tag, e] : manFiles){
-        out << tag << " ";
-        for(int i = 0; i < e.srcs.size(); i++){
-            out << e.srcs[i];
-            if(i < e.srcs.size()-1) out << ",";
-        }
-        out << " ";
+        out << tag << " " << e.src << " ";
         for(int i = 0; i < e.dests.size(); i++){
             out << e.dests[i];
             if(i < e.dests.size()-1) out << ",";
