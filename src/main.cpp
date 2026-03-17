@@ -19,6 +19,7 @@ std::ifstream inW("/home/nullora/novusdeploy/.ndeploy/watched_files.nd");
 std::string lineW;
 std::string tag, src, destsStr;
 void saveFiles();
+void saveAutoFiles();
 int main(int argc, char* argv[]){
     //load from watch file into manFiles.
     while(std::getline(inW,lineW)){
@@ -37,16 +38,29 @@ int main(int argc, char* argv[]){
     }
     std::string cmd = argv[1];
     std::string filepath = argv[2];
-    std::string tagC;
-    if(argc==4) tagC = argv[3];
+    std::string tagC = argv[3];
+    std::string flag = "EMP";
+    if(argc==5) flag = argv[4];
     if(cmd=="add"){
         entry e;
         e.src = filepath;
         manFiles[tagC] = e;
-        saveFiles();
+        if(flag=="--auto")saveAutoFiles();
+        else{ saveFiles();}
     }
     if(cmd=="add-d"){
-        manFiles[tagC].dests.push_back(filepath);
+    manFiles[tagC].dests.push_back(filepath);
+        if(flag=="--auto"){
+            // append just this one entry to auto_watch.nd
+            std::ofstream out(".ndeploy/auto_watch.nd", std::ios::app);
+            entry& e = manFiles[tagC];
+            out << tagC << " " << e.src << " ";
+            for(int i = 0; i < e.dests.size(); i++){
+                    out << e.dests[i];
+                    if(i < e.dests.size()-1) out << ",";
+                }
+            out << "\n";
+        }
         saveFiles();
     }
     if(cmd=="deploy"){
@@ -65,6 +79,17 @@ int main(int argc, char* argv[]){
 void saveFiles(){
     std::ofstream out("/home/nullora/novusdeploy/.ndeploy/watched_files.nd", std::ios::trunc);
     for(auto& [tag, e] : manFiles){
+        out << tag << " " << e.src << " ";
+        for(int i = 0; i < e.dests.size(); i++){
+            out << e.dests[i];
+            if(i < e.dests.size()-1) out << ",";
+        }
+        out << "\n";
+    }
+}
+void saveAutoFiles(){
+    std::ofstream out("/home/nullora/novusdeploy/.ndeploy/auto_watch.nd", std::ios::app);
+    for(auto& [tag, e] : autoFiles){
         out << tag << " " << e.src << " ";
         for(int i = 0; i < e.dests.size(); i++){
             out << e.dests[i];

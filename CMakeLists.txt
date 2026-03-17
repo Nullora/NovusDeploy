@@ -6,4 +6,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(ndep
     src/main.cpp
 )
-target_include_directories(ndep PRIVATE include)
+add_executable(andep
+    src/automain.cpp
+)
