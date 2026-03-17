@@ -6,6 +6,3 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(ndep
     src/main.cpp
 )
-add_executable(andep
-    src/automain.cpp
-)
