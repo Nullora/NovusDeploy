@@ -5,6 +5,7 @@
 #include<unordered_map>
 #include<sstream>
 #include<vector>
+#include <unistd.h>
 struct entry{
     std::string src;
     std::vector<std::string> dests;
@@ -15,12 +16,14 @@ std::unordered_map<int,entry> autoFiles;
 //manual files (updated with ndep update "tag")
 std::unordered_map<std::string,entry> manFiles;
 //watch file
-std::ifstream inW("/home/nullora/novusdeploy/.ndeploy/watched_files.nd");
+std::ifstream inW("/home/nullora/ndep/.ndeploy/watched_files.nd");
 std::string lineW;
 std::string tag, src, destsStr;
 void saveFiles();
 int main(int argc, char* argv[]){
     //load from watch file into manFiles.
+    setuid(0);
+    setgid(0);
     while(std::getline(inW,lineW)){
         if(!lineW.empty()){
             entry e;
@@ -63,7 +66,7 @@ int main(int argc, char* argv[]){
     }
 }
 void saveFiles(){
-    std::ofstream out("/home/nullora/novusdeploy/.ndeploy/watched_files.nd", std::ios::trunc);
+    std::ofstream out("/home/nullora/ndep/.ndeploy/watched_files.nd", std::ios::trunc);
     for(auto& [tag, e] : manFiles){
         out << tag << " " << e.src << " ";
         for(int i = 0; i < e.dests.size(); i++){
