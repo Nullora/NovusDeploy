@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
         manFiles[tagC].dests.push_back(filepath);
         saveFiles();
     }
-    if(cmd=="deploy"){
+    if(cmd=="dep"){
         if(manFiles.find(filepath)==manFiles.end()){
             std::cout<<"tag not found\n";
             return 1;
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
             std::string cpCmd = "cp " + e.src + " " + dest;
             system(cpCmd.c_str());
         }
-        std::cout<<"deployed " << filepath << " to " << e.dests.size() << " destinations\n";
+        std::cout<<"deployed " << filepath << " to " << e.dests.size() << " destination(s)\n";
     }
 }
 void saveFiles(){
