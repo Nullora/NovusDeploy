@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
     }
     if(cmd=="dep"){
         if(manFiles.find(filepath)==manFiles.end()){
-            std::cout<<"tag not found\n";
+            std::cout<<"[--] tag not found\n";
             return 1;
         }
         entry& e = manFiles[filepath];
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
             std::string cpCmd = "cp " + e.src + " " + dest;
             system(cpCmd.c_str());
         }
-        std::cout<<"deployed " << filepath << " to " << e.dests.size() << " destination(s)\n";
+        std::cout<<"[++] deployed " << filepath << " to " << e.dests.size() << " destination(s)\n";
     }
 }
 void saveFiles(){
