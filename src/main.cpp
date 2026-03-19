@@ -18,7 +18,6 @@ std::unordered_map<std::string,entry> manFiles;
 //watch file
 std::ifstream inW("/home/nullora/ndep/.ndeploy/watched_files.nd");
 std::string lineW;
-std::string tag, src, destsStr;
 void saveFiles();
 int main(int argc, char* argv[]){
     //load from watch file into manFiles.
@@ -27,6 +26,7 @@ int main(int argc, char* argv[]){
     while(std::getline(inW,lineW)){
         if(!lineW.empty()){
             entry e;
+            std::string tag, src, destsStr;
             std::istringstream ss(lineW);
             std::string dest;
             ss >> tag >> src >> destsStr;
