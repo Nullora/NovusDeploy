@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
     }
     if(cmd=="dep"){
         if(manFiles.find(filepath)==manFiles.end()){
-            std::cout<<"[--] tag not found\n";
+            std::cout<<"[--] tag not found..\n";
             return 1;
         }
         entry& e = manFiles[filepath];
