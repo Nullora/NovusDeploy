@@ -1,7 +1,6 @@
 #include<string>
 #include<iostream>
 #include<fstream>
-#include<sys/inotify.h>
 #include<unordered_map>
 #include<sstream>
 #include<vector>
@@ -11,8 +10,6 @@ struct entry{
     std::vector<std::string> dests;
 };
 //init inotify for auto pushes (future update)
-int fd = inotify_init1(IN_CLOEXEC);
-std::unordered_map<int,entry> autoFiles;
 //manual files (updated with ndep update "tag")
 std::unordered_map<std::string,entry> manFiles;
 //watch file
