@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
                     tag_group t;
                     std::string groupId, tagsStr, tag;
                     std::istringstream ss(lineW);
-                    ss >> groupId, tagsStr;
+                    ss >> groupId >> tagsStr;
                     std::istringstream tss(tagsStr);
                     while(std::getline(tss,tag,',')){
                         t.tags.push_back(tag);
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]){
             std::getline(std::cin,tag);
             if(tag=="hlt"){
                 saveFiles();
-                return 1;
+                return 0;
             }
             t.tags.push_back(tag);
             TagGroups[grp] = t;
