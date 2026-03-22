@@ -7,7 +7,7 @@ all: $(TARGET) install
 $(TARGET): src/main.cpp
 	$(CXX) $(CXXFLAGS) src/main.cpp -o $(TARGET)
 
-install: all
+install:
 	sudo cp $(TARGET) /usr/local/bin/
 
 clean:

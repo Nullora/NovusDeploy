@@ -30,6 +30,7 @@ bool deploy(std::string tag){
     entry& e = manFiles[tag];
     for(auto& dest : e.dests){
         std::string cpCmd = "cp " + e.src.string() + " " + dest;
+        std::cout<<cpCmd<< '\n';
         system(cpCmd.c_str());
     }
     std::cout<<"[++] deployed " << tag << " to " << e.dests.size() << " destination(s)\n";
@@ -150,29 +151,50 @@ int main(int argc, char* argv[]){
     if(cmd=="set"){
         if(manFiles.find(filepath)==manFiles.end()){
             std::cout<<"[--] tag not found..\n";
-            return false;
+            return 1;
         }
         set(filepath);
     }
     if(cmd=="rev"){
         if(manFiles.find(filepath)==manFiles.end()){
             std::cout<<"[--] tag not found..\n";
-            return false;
+            return 1;
         }
         revert(filepath);
+    }
+    if(cmd=="setg"){
+        if(TagGroups.find(filepath)==TagGroups.end()){
+            std::cout<<"[--] group not found..\n";
+            return 1;
+        }
+        tag_group& e = TagGroups[filepath];
+        for(auto& t : e.tags){
+            if(!set(t)) return 1;
+        }
+    }
+    if(cmd=="revg"){
+        if(TagGroups.find(filepath)==TagGroups.end()){
+            std::cout<<"[--] group not found..\n";
+            return 1;
+        }
+        tag_group& e = TagGroups[filepath];
+        for(auto& t : e.tags){
+            if(!revert(t)) return 1;
+        }
     }
     return 0;
 }
 void saveFiles(){
     std::ofstream out("/home/nullora/ndep/.ndeploy/watched_files.nd", std::ios::trunc);
     for(auto& [tag, e] : manFiles){
-        out<<"T:" << tag << " " << e.src << " ";
+        out<<"T:" << tag << " " << e.src.string() << " ";
         for(int i = 0; i < e.dests.size(); i++){
             out << e.dests[i];
             if(i < e.dests.size()-1) out << ",";
         }
         out << "\n";
     }
+
     for(auto& [gid, t] : TagGroups){
         out << "G:"<< gid << " ";
         for(int i = 0; i < t.tags.size(); i++){
