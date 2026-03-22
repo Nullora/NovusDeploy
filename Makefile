@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++20
 TARGET = build/ndep
 
-all: $(TARGET)
+all: $(TARGET) install
 
 $(TARGET): src/main.cpp
 	$(CXX) $(CXXFLAGS) src/main.cpp -o $(TARGET)

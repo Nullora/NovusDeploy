@@ -5,8 +5,9 @@
 #include<sstream>
 #include<vector>
 #include <unistd.h>
+#include <filesystem>
 struct entry{
-    std::string src;
+    std::filesystem::path src;
     std::vector<std::string> dests;
 };
 struct tag_group{
@@ -28,13 +29,37 @@ bool deploy(std::string tag){
     }
     entry& e = manFiles[tag];
     for(auto& dest : e.dests){
-        std::string cpCmd = "cp " + e.src + " " + dest;
+        std::string cpCmd = "cp " + e.src.string() + " " + dest;
         system(cpCmd.c_str());
     }
     std::cout<<"[++] deployed " << tag << " to " << e.dests.size() << " destination(s)\n";
     return true;
 }
 
+bool set(std::string tag){
+    if(manFiles.find(tag)==manFiles.end()){
+        std::cout<<"[--] tag not found..\n";
+        return false;
+    }
+    entry e = manFiles[tag];
+    std::string cpCmd = "cp " + e.src.string() + " " + "/home/nullora/ndep/.ndeploy/backups";
+    system(cpCmd.c_str());
+    std::cout<<"[+] set checkpoint for "<< tag << '\n';
+    return true;
+}
+
+bool revert(std::string tag){
+    if(manFiles.find(tag)==manFiles.end()){
+        std::cout<<"[--] tag not found..\n";
+        return false;
+    }
+    entry e = manFiles[tag];
+    std::filesystem::path backup = "/home/nullora/ndep/.ndeploy/backups/" + e.src.filename().string();
+    std::string cpCmd = "cp " + backup.string() + " " + e.src.string();
+    system(cpCmd.c_str());
+    std::cout<<"[+] reverted to checkpoint for "<< tag << '\n';
+    return true;
+}
 
 int main(int argc, char* argv[]){
     //load from watch file into manFiles.
@@ -85,6 +110,10 @@ int main(int argc, char* argv[]){
         saveFiles();
     }
     if(cmd=="add-d"){
+        if(manFiles.find(tagC)==manFiles.end()){
+            std::cout<<"[--] tag not found..\n";
+            return false;
+        }
         manFiles[tagC].dests.push_back(filepath);
         saveFiles();
     }
@@ -118,6 +147,21 @@ int main(int argc, char* argv[]){
         }
         std::cout << "deploy group " << filepath << " successfully \n";
     }
+    if(cmd=="set"){
+        if(manFiles.find(filepath)==manFiles.end()){
+            std::cout<<"[--] tag not found..\n";
+            return false;
+        }
+        set(filepath);
+    }
+    if(cmd=="rev"){
+        if(manFiles.find(filepath)==manFiles.end()){
+            std::cout<<"[--] tag not found..\n";
+            return false;
+        }
+        revert(filepath);
+    }
+    return 0;
 }
 void saveFiles(){
     std::ofstream out("/home/nullora/ndep/.ndeploy/watched_files.nd", std::ios::trunc);
