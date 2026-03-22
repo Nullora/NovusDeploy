@@ -8,6 +8,7 @@ You can't add more than 1 source file in 1 tag. Trying will overwrite the old so
 - **ndep add file1 tag1**
 - **ndep add file2 tag1**
 this will wipe file1 from ndep memory and only sync file2 to every destination
-# Note 
-- Put Ndeploy in /usr/local/bin to use it from anywhere and save time.
-- Sadly, you can't make ndep deploy itself, I tried :c (you probably could if you write to a temp file but honestly I dont wanna do that.)
+
+```bash
+make # run this to auto build the file and call it a day 
+```
