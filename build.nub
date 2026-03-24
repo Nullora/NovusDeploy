@@ -1,0 +1,21 @@
+CXX = g++
+CXXFLAGS = -std=c++20
+TARGET = build/ndep
+
+/i{
+    sh: (CXX) (CXXFLAGS) src/main.cpp -o (TARGET)
+    sh: sudo cp (TARGET) /usr/local/bin/
+    sh: echo built and shipped.
+}
+/c{
+    sh: rm -f (TARGET)
+}
+/g{
+    sh: git add . && git commit -m "fix" && git push
+}
+/p{
+    sh: git pull --no-rebase
+}
+main{
+    fn: i
+}
