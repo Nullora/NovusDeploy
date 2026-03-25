@@ -30,7 +30,6 @@ bool deploy(std::string tag){
     entry& e = manFiles[tag];
     for(auto& dest : e.dests){
         std::string cpCmd = "cp " + e.src.string() + " " + dest;
-        std::cout<<cpCmd<< '\n';
         system(cpCmd.c_str());
     }
     std::cout<<"[++] deployed " << tag << " to " << e.dests.size() << " destination(s)\n";
@@ -110,7 +109,7 @@ int main(int argc, char* argv[]){
         manFiles[tagC] = e;
         saveFiles();
     }
-    if(cmd=="add-d"){
+    else if(cmd=="add-d"){
         if(manFiles.find(tagC)==manFiles.end()){
             std::cout<<"[--] tag not found..\n";
             return false;
@@ -118,7 +117,7 @@ int main(int argc, char* argv[]){
         manFiles[tagC].dests.push_back(filepath);
         saveFiles();
     }
-    if(cmd=="addg"){
+    else if(cmd=="addg"){
         bool in = true;
         tag_group t;
         std::string grp,tag;
@@ -134,10 +133,10 @@ int main(int argc, char* argv[]){
             TagGroups[grp] = t;
         }
     }
-    if(cmd=="dep"){
+    else if(cmd=="dep"){
         deploy(filepath);
     }
-    if(cmd=="depg"){
+    else if(cmd=="depg"){
         if(TagGroups.find(filepath)==TagGroups.end()){
             std::cout<<"[--] group not found..\n";
             return 1;
@@ -148,21 +147,21 @@ int main(int argc, char* argv[]){
         }
         std::cout << "deploy group " << filepath << " successfully \n";
     }
-    if(cmd=="set"){
+    else if(cmd=="set"){
         if(manFiles.find(filepath)==manFiles.end()){
             std::cout<<"[--] tag not found..\n";
             return 1;
         }
         set(filepath);
     }
-    if(cmd=="rev"){
+    else if(cmd=="rev"){
         if(manFiles.find(filepath)==manFiles.end()){
             std::cout<<"[--] tag not found..\n";
             return 1;
         }
         revert(filepath);
     }
-    if(cmd=="setg"){
+    else if(cmd=="setg"){
         if(TagGroups.find(filepath)==TagGroups.end()){
             std::cout<<"[--] group not found..\n";
             return 1;
@@ -172,7 +171,7 @@ int main(int argc, char* argv[]){
             if(!set(t)) return 1;
         }
     }
-    if(cmd=="revg"){
+    else if(cmd=="revg"){
         if(TagGroups.find(filepath)==TagGroups.end()){
             std::cout<<"[--] group not found..\n";
             return 1;
