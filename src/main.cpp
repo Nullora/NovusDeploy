@@ -21,7 +21,7 @@ std::unordered_map<std::string,tag_group> TagGroups;
 std::ifstream inW("/home/nullora/ndep/.ndeploy/watched_files.nd");
 std::string lineW;
 void saveFiles();
-
+//& deploy
 bool deploy(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
         std::cout<<"[--] tag not found..\n";
@@ -35,7 +35,8 @@ bool deploy(std::string tag){
     std::cout<<"[++] deployed " << tag << " to " << e.dests.size() << " destination(s)\n";
     return true;
 }
-
+//!
+//& set
 bool set(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
         std::cout<<"[--] tag not found..\n";
@@ -47,7 +48,8 @@ bool set(std::string tag){
     std::cout<<"[+] set checkpoint for "<< tag << '\n';
     return true;
 }
-
+//!
+//& revert
 bool revert(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
         std::cout<<"[--] tag not found..\n";
@@ -60,7 +62,8 @@ bool revert(std::string tag){
     std::cout<<"[+] reverted to checkpoint for "<< tag << '\n';
     return true;
 }
-
+//!
+//& main
 int main(int argc, char* argv[]){
     //load from watch file into manFiles.
     setuid(0);
@@ -183,6 +186,8 @@ int main(int argc, char* argv[]){
     }
     return 0;
 }
+//!
+//& saveFiles
 void saveFiles(){
     std::ofstream out("/home/nullora/ndep/.ndeploy/watched_files.nd", std::ios::trunc);
     for(auto& [tag, e] : manFiles){
@@ -203,3 +208,4 @@ void saveFiles(){
         out << "\n";
     }
 }
+//!
