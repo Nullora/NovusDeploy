@@ -6,6 +6,8 @@
 #include<vector>
 #include <unistd.h>
 #include <filesystem>
+
+std::string home;
 struct entry{
     std::filesystem::path src;
     std::vector<std::string> dests;
@@ -18,7 +20,8 @@ struct tag_group{
 std::unordered_map<std::string,entry> manFiles;
 std::unordered_map<std::string,tag_group> TagGroups;
 //watch file
-std::ifstream inW("/home/nullora/ndep/.ndeploy/watched_files.nd");
+std::string watchfile;
+std::ifstream inW;
 std::string lineW;
 void saveFiles();
 //& deploy
@@ -43,7 +46,7 @@ bool set(std::string tag){
         return false;
     }
     entry e = manFiles[tag];
-    std::string cpCmd = "cp " + e.src.string() + " " + "/home/nullora/ndep/.ndeploy/backups";
+    std::string cpCmd = "cp " + e.src.string() + " " + home+"/ndep/.ndeploy/backups";
     system(cpCmd.c_str());
     std::cout<<"[+] set checkpoint for "<< tag << '\n';
     return true;
@@ -56,7 +59,7 @@ bool revert(std::string tag){
         return false;
     }
     entry e = manFiles[tag];
-    std::filesystem::path backup = "/home/nullora/ndep/.ndeploy/backups/" + e.src.filename().string();
+    std::filesystem::path backup = home+"/ndep/.ndeploy/backups/" + e.src.filename().string();
     std::string cpCmd = "cp " + backup.string() + " " + e.src.string();
     system(cpCmd.c_str());
     std::cout<<"[+] reverted to checkpoint for "<< tag << '\n';
@@ -68,6 +71,9 @@ int main(int argc, char* argv[]){
     //load from watch file into manFiles.
     setuid(0);
     setgid(0);
+    std::string home = getenv("HOME");
+    std::string watchfile = home + "/ndep/.ndeploy/watched_files.nd";
+    std::ifstream inW(watchfile);
     while(std::getline(inW,lineW)){
         if(!lineW.empty()){
             // handle tags
@@ -189,7 +195,7 @@ int main(int argc, char* argv[]){
 //!
 //& saveFiles
 void saveFiles(){
-    std::ofstream out("/home/nullora/ndep/.ndeploy/watched_files.nd", std::ios::trunc);
+    std::ofstream out(watchfile, std::ios::trunc);
     for(auto& [tag, e] : manFiles){
         out<<"T:" << tag << " " << e.src.string() << " ";
         for(int i = 0; i < e.dests.size(); i++){

@@ -2,15 +2,22 @@ CXX = g++
 CXXFLAGS = -std=c++20
 TARGET = build/ndep
 
-all: $(TARGET) install
+all: $(TARGET) build deploy
 
-$(TARGET): src/main.cpp
+$(TARGET): src/main.cpp | build
 	$(CXX) $(CXXFLAGS) src/main.cpp -o $(TARGET)
 
-install:
+deploy:
 	sudo cp $(TARGET) /usr/local/bin/
 
-clean:
-	rm -f $(TARGET)
+build:
+	mkdir -p build
 
-.PHONY: all install clean
+clean:
+	rm -rf build
+
+setup:
+	mkdir -p .ndeploy/backups
+	touch .ndeploy/watched_files.nd
+
+.PHONY: all deploy clean build setup
