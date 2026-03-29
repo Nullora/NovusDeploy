@@ -7,7 +7,7 @@ git clone https://github.com/Nullora/NovusDeploy
 ```
 ## Setup folders (MANDATORY)
 ```bash
-make setup # makes neccecary folders and files
+make setup # makes necessary folders and files
 ```
 ## Build your own binary (OPTIONAL)
 If you are gonna make changes or do not trust my binary, do this:
