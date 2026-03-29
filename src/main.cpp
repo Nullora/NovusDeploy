@@ -71,9 +71,10 @@ int main(int argc, char* argv[]){
     //load from watch file into manFiles.
     setuid(0);
     setgid(0);
-    std::string home = getenv("HOME");
-    std::string watchfile = home + "/ndep/.ndeploy/watched_files.nd";
-    std::ifstream inW(watchfile);
+    home = getenv("HOME");
+    watchfile = home + "/ndep/.ndeploy/watched_files.nd";
+    inW.open(watchfile);
+    
     while(std::getline(inW,lineW)){
         if(!lineW.empty()){
             // handle tags
