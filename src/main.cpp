@@ -1,4 +1,4 @@
-#include<nn.hpp>
+#include"nn.hpp"
 #include<string>
 #include<iostream>
 #include<fstream>
@@ -40,10 +40,10 @@ bool deploy(std::string tag){
     return true;
 }
 //!
-
-bool networkDeploy(string Targetfilepath){
+//& networkDeploy
+bool networkDeploy(std::string Targetfilepath){
 }
-
+//!
 //& set
 bool set(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
