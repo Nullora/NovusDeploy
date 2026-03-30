@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++20
+CXXFLAGS = -std=c++20 -Iinclude
 TARGET = build/ndep
 
 all: $(TARGET) build deploy
