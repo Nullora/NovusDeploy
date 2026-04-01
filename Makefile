@@ -8,7 +8,9 @@ $(TARGET): src/main.cpp | build
 	$(CXX) $(CXXFLAGS) src/main.cpp -o $(TARGET)
 
 deploy:
-	sudo cp $(TARGET) /usr/local/bin/
+	sudo cp build/ndep /usr/local/bin/
+	sudo chown root:root /usr/local/bin/ndep
+	sudo chmod u+s /usr/local/bin/ndep
 
 build:
 	mkdir -p build
