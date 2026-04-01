@@ -68,22 +68,32 @@ bool revert(std::string tag){
 //!
 //& deployToPath
 bool deployToPath(std::string tag){
-    if(manFiles.find(tag)==manFiles.end()){
-        std::cout<<"[--] tag not found..\n";
+    if(manFiles.find(tag) == manFiles.end()){
+        std::cout << "[--] tag not found..\n";
         return false;
     }
     entry& e = manFiles[tag];
-    std::string cpCmd = "cp " + e.src.string() + " /usr/local/bin";
-    system(cpCmd.c_str());
-    std::cout<<"[++] deployed " << tag << " to PATH\n";
+    std::error_code ec;
+    std::filesystem::path dest = "/usr/local/bin/" + e.src.filename().string();
+    //faster
+    std::filesystem::copy_file(e.src, dest, std::filesystem::copy_options::overwrite_existing, ec);
+    
+    if (ec) {
+        std::cout << "[--] Failed: " << ec.message() << " (Did you forget sudo/SUID?)\n";
+        return false;
+    }
+    
+    std::cout << "[++] deployed " << tag << " to PATH\n";
     return true;
 }
 //!
 //& main
 int main(int argc, char* argv[]){
     //load from watch file into manFiles.
-    setuid(0);
     setgid(0);
+    if (setuid(0) != 0) {
+        std::cout<<"ndep not running as root, some commands might not work.\n";
+    }
     home = getenv("HOME");
     watchfile = home + "/work/ndep/.ndeploy/watched_files.nd";
     inW.open(watchfile);
