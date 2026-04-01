@@ -139,6 +139,8 @@ int main(int argc, char* argv[]){
     std::string filepath = argv[2];
     std::string tagC;
     if(argc==4) tagC = argv[3];
+    //i tried doing it with switches but forgot they only support int and char. i couldnt be assed to
+    //map the commands into int ids thatll probably make it a mile slower
     if(cmd=="add"){
         entry e;
         e.src = filepath;
