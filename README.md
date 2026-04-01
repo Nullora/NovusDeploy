@@ -1,21 +1,20 @@
 # NovusDeploy
 A tool to help you keep your code up-to-date across multiple files.
 # Installation (Linux Only)
-## Clone the repo (MANDATORY)
+## Clone the repo
 ```bash
 git clone https://github.com/Nullora/NovusDeploy
 ```
-## Setup folders (MANDATORY)
+## Setup folders
 ```bash
 make setup # makes necessary folders and files
 ```
-## Build your own binary (OPTIONAL)
-If you are gonna make changes or do not trust my binary, do this:
+## Build your own binary
 ```bash
 make clean
 make # requires gcc installed
 ```
-## Copy to path (MANDATORY)
+## Copy to path
 Copy it to PATH
 ```bash
 make deploy
@@ -28,11 +27,11 @@ ndep add ~/path/to/file <yourtag>
 ```
 To add a destination file and assign it to a tag
 ```bash
-ndep add-d ~/destination/folder <yourtag>
+ndep add-d ~/destination/folder <yourtag> # "add destination"
 ```
 To deploy the new source file to all destination files
 ```bash
-ndep dep <yourtag>
+ndep dep <yourtag> # "deploy"
 ```
 To backup your source file
 ```bash
@@ -40,12 +39,16 @@ ndep set <yourtag>
 ```
 To revert your source file to last backup
 ```bash
-ndep rev <yourtag>
+ndep rev <yourtag> # "revert"
+```
+To directly deploy your tag to PATH instead of manually adding PATH to your dests
+```bash
+ndep depp <yourtag> # "deploy path"
 ```
 ## Multi tag / Tag groups (Advanced)
 To make a new group
 ```bash
-ndep addg <groupname>
+ndep addg <groupname> # "add group"
 ```
 This will prompt you for a list of already existing tags:
 ```bash
@@ -56,7 +59,7 @@ Tag to add: hlt # ends tag group
 
 To set a backup for that group
 ```bash
-ndep setg <groupname>
+ndep setg <groupname> # "set group"
 ```
 To revert group to previous backup
 ```bash
@@ -65,5 +68,5 @@ ndep revg <groupname> # this reverts the whole group, use with caution
 
 To deploy all tags in a group to their respective destination folders
 ```bash
-ndep depg <groupname> # this deploys every tag to its destination
+ndep depg <groupname> # this deploys every tag to its corresponding destination
 ```
