@@ -92,7 +92,10 @@ int main(int argc, char* argv[]){
     //load from watch file into manFiles.
     setgid(0);
     if (setuid(0) != 0) {
-        std::cout<<"ndep not running as root, some commands might not work.\n";
+        std::cerr<<"ndep not running as root, some commands might not work.\n";
+    }
+    if (setreuid(0, 0) != 0) {
+        std::cerr << "ndep not running as root, some commands might not work.\n";
     }
     home = getenv("HOME");
     watchfile = home + "/work/ndep/.ndeploy/watched_files.nd";
