@@ -1,4 +1,3 @@
-#include"nn.hpp"
 #include<string>
 #include<iostream>
 #include<fstream>
@@ -40,11 +39,6 @@ bool deploy(std::string tag){
     return true;
 }
 //!
-//& networkDeploy
-bool networkDeploy(std::string Targetfilepath){
-    return false;
-}
-//!
 //& set
 bool set(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
@@ -52,7 +46,7 @@ bool set(std::string tag){
         return false;
     }
     entry e = manFiles[tag];
-    std::string cpCmd = "cp " + e.src.string() + " " + home+"/ndep/.ndeploy/backups";
+    std::string cpCmd = "cp " + e.src.string() + " " + home+"/work/ndep/.ndeploy/backups";
     system(cpCmd.c_str());
     std::cout<<"[+] set checkpoint for "<< tag << '\n';
     return true;
@@ -65,10 +59,23 @@ bool revert(std::string tag){
         return false;
     }
     entry e = manFiles[tag];
-    std::filesystem::path backup = home+"/ndep/.ndeploy/backups/" + e.src.filename().string();
+    std::filesystem::path backup = home+"/work/ndep/.ndeploy/backups/" + e.src.filename().string();
     std::string cpCmd = "cp " + backup.string() + " " + e.src.string();
     system(cpCmd.c_str());
     std::cout<<"[+] reverted to checkpoint for "<< tag << '\n';
+    return true;
+}
+//!
+//& deployToPath
+bool deployToPath(std::string tag){
+    if(manFiles.find(tag)==manFiles.end()){
+        std::cout<<"[--] tag not found..\n";
+        return false;
+    }
+    entry& e = manFiles[tag];
+    std::string cpCmd = "cp " + e.src.string() + " /usr/local/bin";
+    system(cpCmd.c_str());
+    std::cout<<"[++] deployed " << tag << " to PATH\n";
     return true;
 }
 //!
@@ -78,7 +85,7 @@ int main(int argc, char* argv[]){
     setuid(0);
     setgid(0);
     home = getenv("HOME");
-    watchfile = home + "/ndep/.ndeploy/watched_files.nd";
+    watchfile = home + "/work/ndep/.ndeploy/watched_files.nd";
     inW.open(watchfile);
     
     while(std::getline(inW,lineW)){
@@ -196,6 +203,9 @@ int main(int argc, char* argv[]){
         for(auto& t : e.tags){
             if(!revert(t)) return 1;
         }
+    }
+    else if(cmd=="depp"){
+        deployToPath(filepath);
     }
     return 0;
 }
