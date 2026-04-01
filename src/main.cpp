@@ -79,7 +79,7 @@ bool deployToPath(std::string tag){
     std::filesystem::copy_file(e.src, dest, std::filesystem::copy_options::overwrite_existing, ec);
     
     if (ec) {
-        std::cout << "[--] Failed: " << ec.message() << " (Did you forget sudo/SUID?)\n";
+        std::cout << "[--] Failed: " << ec.message()<<'\n';
         return false;
     }
     
