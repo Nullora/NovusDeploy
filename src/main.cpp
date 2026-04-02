@@ -104,6 +104,18 @@ bool deployToPath(std::string tag){
     return true;
 }
 
+void deleteTag(std::string tag){
+    if(manFiles.find(tag)==manFiles.end()){
+        std::cout<<"[--] tag not found..\n";
+        return;
+    }
+    manFiles.erase(tag);
+    std::cout<<"Successfully removed " << tag << '\n';
+    saveFiles(); 
+
+}
+
+//the 3 functions below are ugly and made to keep the main() clean.
 void assignCmdToEnum(std::string cmd, CMDS* e_){
     //we put the value of e_ according to the value of cmd
     if(cmd=="add") *e_ = ADD;
@@ -209,6 +221,9 @@ void handleCommands(CMDS* cmds, std::string var1, std::string var2) {
             deployToPath(var1);
             break;
             
+        case DEL:
+            deleteTag(var1);
+            break;
         default:
             break;
     }
