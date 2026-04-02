@@ -6,7 +6,8 @@
 #include<vector>
 #include <unistd.h>
 #include <filesystem>
-
+//  initial stuff
+enum CMDS {ADD, ADDD, ADDG, DEP, DEPP, SET, REV, SETG, REVG, DEL, DEPG};
 std::string home;
 struct entry{
     std::filesystem::path src;
@@ -15,16 +16,35 @@ struct entry{
 struct tag_group{
     std::vector<std::string> tags;
 };
-
-//manual files (updated with ndep update "tag")
 std::unordered_map<std::string,entry> manFiles;
 std::unordered_map<std::string,tag_group> TagGroups;
-//watch file
+//these are global so i dont pass them to each function that uses them (2 whole functions)
 std::string watchfile;
 std::ifstream inW;
 std::string lineW;
-void saveFiles();
-//& deploy
+
+
+void saveFiles(){
+    std::ofstream out(watchfile, std::ios::trunc);
+    for(auto& [tag, e] : manFiles){
+        out<<"T:" << tag << " " << e.src.string() << " ";
+        for(int i = 0; i < e.dests.size(); i++){
+            out << e.dests[i];
+            if(i < e.dests.size()-1) out << ",";
+        }
+        out << "\n";
+    }
+
+    for(auto& [gid, t] : TagGroups){
+        out << "G:"<< gid << " ";
+        for(int i = 0; i < t.tags.size(); i++){
+            out << t.tags[i];
+            if(i < t.tags.size()-1) out << ",";
+        }
+        out << "\n";
+    }
+}
+
 bool deploy(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
         std::cout<<"[--] tag not found..\n";
@@ -38,8 +58,7 @@ bool deploy(std::string tag){
     std::cout<<"[++] deployed " << tag << " to " << e.dests.size() << " destination(s)\n";
     return true;
 }
-//!
-//& set
+
 bool set(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
         std::cout<<"[--] tag not found..\n";
@@ -51,8 +70,7 @@ bool set(std::string tag){
     std::cout<<"[+] set checkpoint for "<< tag << '\n';
     return true;
 }
-//!
-//& revert
+
 bool revert(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
         std::cout<<"[--] tag not found..\n";
@@ -65,8 +83,7 @@ bool revert(std::string tag){
     std::cout<<"[+] reverted to checkpoint for "<< tag << '\n';
     return true;
 }
-//!
-//& deployToPath
+
 bool deployToPath(std::string tag){
     if(manFiles.find(tag) == manFiles.end()){
         std::cout << "[--] tag not found..\n";
@@ -86,21 +103,119 @@ bool deployToPath(std::string tag){
     std::cout << "[++] deployed " << tag << " to PATH\n";
     return true;
 }
-//!
-//& main
-int main(int argc, char* argv[]){
-    //load from watch file into manFiles.
-    setgid(0);
-    if (setuid(0) != 0) {
-        std::cerr<<"ndep not running as root, some commands might not work.\n";
-    }
-    if (setreuid(0, 0) != 0) {
-        std::cerr << "ndep not running as root, some commands might not work.\n";
-    }
-    home = getenv("HOME");
-    watchfile = home + "/work/ndep/.ndeploy/watched_files.nd";
-    inW.open(watchfile);
+
+void assignCmdToEnum(std::string cmd, CMDS* e_){
+    //we put the value of e_ according to the value of cmd
+    if(cmd=="add") *e_ = ADD;
+    else if(cmd=="add-d") *e_ = ADDD; 
+    else if(cmd=="addg") *e_ = ADDG;
+    else if(cmd=="dep") *e_ = DEP;
+    else if(cmd=="depg") *e_ = DEPG;
+    else if(cmd=="depp") *e_ = DEPP;
+    else if(cmd=="set") *e_ = SET;
+    else if(cmd=="rev") *e_ = REV;
+    else if(cmd=="revg") *e_ = REVG;
+    else if(cmd=="setg") *e_ = SETG;
+    else if(cmd=="del") *e_ = DEL;
+
+}
+
+void handleCommands(CMDS* cmds, std::string var1, std::string var2) {
+    if (!cmds) return;
+
     
+    entry e;
+    std::string tag;
+
+    switch (*cmds) {
+        case ADD:
+            e.src = var1;
+            manFiles[var2] = e;
+            saveFiles();
+            break;
+
+        case ADDD:
+            if (manFiles.find(var2) == manFiles.end()) {
+                std::cout << "[--] tag not found..\n";
+                break;
+            }
+            manFiles[var2].dests.push_back(var1);
+            saveFiles();
+            break;
+
+        case ADDG: {
+            tag_group t; 
+            std::string grp = var1;
+            while (true) {
+                std::cout << "Tag to add: ";
+                std::getline(std::cin, tag);
+                if (tag == "hlt") break;
+                t.tags.push_back(tag);
+            }
+            TagGroups[grp] = t;
+            saveFiles();
+            break;
+        }
+
+        case DEP:
+            deploy(var1);
+            break;
+
+        case DEPG: {
+            if (TagGroups.find(var1) == TagGroups.end()) {
+                std::cout << "[--] group not found..\n";
+                break;
+            }
+            tag_group& ei = TagGroups[var1];
+            for (auto& t_tag : ei.tags) {
+                if (!deploy(t_tag)) {
+                    std::cout << "not deployed\n"; 
+                    break;
+                }
+            }
+            std::cout << "deploy group " << var1 << " successfully \n";
+            break;
+        }
+
+        case SET:
+            set(var1);
+            break;
+
+        case REV:
+            revert(var1);
+            break;
+
+        case SETG: {
+            if (TagGroups.count(var1)) {
+                tag_group& ei = TagGroups[var1];
+                for (auto& t_tag : ei.tags) {
+                    if (!set(t_tag)) break;
+                }
+            }
+            break;
+        }
+
+        case REVG: {
+            if (TagGroups.count(var1)) {
+                tag_group& ei = TagGroups[var1];
+                for (auto& t_tag : ei.tags) {
+                    if (!revert(t_tag)) break;
+                }
+            }
+            break;
+        }
+
+        case DEPP:
+            deployToPath(var1);
+            break;
+            
+        default:
+            break;
+    }
+}
+
+
+void parseFile(){
     while(std::getline(inW,lineW)){
         if(!lineW.empty()){
             // handle tags
@@ -135,115 +250,37 @@ int main(int argc, char* argv[]){
             }
         }
     }
-    std::string cmd = argv[1];
-    std::string filepath = argv[2];
-    std::string tagC;
-    if(argc==4) tagC = argv[3];
-    //i tried doing it with switches but forgot they only support int and char. i couldnt be assed to
-    //map the commands into int ids thatll probably make it a mile slower
-    if(cmd=="add"){
-        entry e;
-        e.src = filepath;
-        manFiles[tagC] = e;
-        saveFiles();
+}
+
+int main(int argc, char* argv[]){
+    //  run as root
+    setgid(0);
+    if (setuid(0) != 0) {
+        std::cerr<<"ndep not running as root, some commands might not work.\n";
     }
-    else if(cmd=="add-d"){
-        if(manFiles.find(tagC)==manFiles.end()){
-            std::cout<<"[--] tag not found..\n";
-            return false;
-        }
-        manFiles[tagC].dests.push_back(filepath);
-        saveFiles();
+    if (setreuid(0, 0) != 0) {
+        std::cerr << "ndep not running as root, some commands might not work.\n";
     }
-    else if(cmd=="addg"){
-        bool in = true;
-        tag_group t;
-        std::string grp,tag;
-        grp = filepath;
-        while(true){
-            std::cout<<"Tag to add: ";
-            std::getline(std::cin,tag);
-            if(tag=="hlt"){
-                saveFiles();
-                return 0;
-            }
-            t.tags.push_back(tag);
-            TagGroups[grp] = t;
-        }
-    }
-    else if(cmd=="dep"){
-        deploy(filepath);
-    }
-    else if(cmd=="depg"){
-        if(TagGroups.find(filepath)==TagGroups.end()){
-            std::cout<<"[--] group not found..\n";
-            return 1;
-        }
-        tag_group& e = TagGroups[filepath];
-        for(auto& t : e.tags){
-            if(!deploy(t)){std::cout<<"not deployed\n"; return 1;}
-        }
-        std::cout << "deploy group " << filepath << " successfully \n";
-    }
-    else if(cmd=="set"){
-        if(manFiles.find(filepath)==manFiles.end()){
-            std::cout<<"[--] tag not found..\n";
-            return 1;
-        }
-        set(filepath);
-    }
-    else if(cmd=="rev"){
-        if(manFiles.find(filepath)==manFiles.end()){
-            std::cout<<"[--] tag not found..\n";
-            return 1;
-        }
-        revert(filepath);
-    }
-    else if(cmd=="setg"){
-        if(TagGroups.find(filepath)==TagGroups.end()){
-            std::cout<<"[--] group not found..\n";
-            return 1;
-        }
-        tag_group& e = TagGroups[filepath];
-        for(auto& t : e.tags){
-            if(!set(t)) return 1;
-        }
-    }
-    else if(cmd=="revg"){
-        if(TagGroups.find(filepath)==TagGroups.end()){
-            std::cout<<"[--] group not found..\n";
-            return 1;
-        }
-        tag_group& e = TagGroups[filepath];
-        for(auto& t : e.tags){
-            if(!revert(t)) return 1;
-        }
-    }
-    else if(cmd=="depp"){
-        deployToPath(filepath);
-    }
+    //  variables for functions
+    home = getenv("HOME");
+    watchfile = home + "/work/ndep/.ndeploy/watched_files.nd";
+    inW.open(watchfile);
+
+    //  variables for current
+    CMDS e_;
+    std::string cmd;
+    std::string var1;
+    std::string var2;
+    if(argc>=2) cmd = argv[1];
+    if(argc>=3) var1 = argv[2];
+    if(argc>=4) var2 = argv[3];
+
+
+    //  actual command handling
+    parseFile();
+    assignCmdToEnum(cmd, &e_);
+    handleCommands(&e_, var1, var2);
+
+
     return 0;
 }
-//!
-//& saveFiles
-void saveFiles(){
-    std::ofstream out(watchfile, std::ios::trunc);
-    for(auto& [tag, e] : manFiles){
-        out<<"T:" << tag << " " << e.src.string() << " ";
-        for(int i = 0; i < e.dests.size(); i++){
-            out << e.dests[i];
-            if(i < e.dests.size()-1) out << ",";
-        }
-        out << "\n";
-    }
-
-    for(auto& [gid, t] : TagGroups){
-        out << "G:"<< gid << " ";
-        for(int i = 0; i < t.tags.size(); i++){
-            out << t.tags[i];
-            if(i < t.tags.size()-1) out << ",";
-        }
-        out << "\n";
-    }
-}
-//!
