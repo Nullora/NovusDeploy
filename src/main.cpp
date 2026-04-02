@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <filesystem>
 //  initial stuff
-enum CMDS {ADD, ADDD, ADDG, DEP, DEPP, SET, REV, SETG, REVG, DEL, DEPG};
+enum CMDS {ADD, ADDD, ADDG, DEP, DEPP, SET, REV, SETG, REVG, DEL, DEPG, LS, LSG};
 std::string home;
 struct entry{
     std::filesystem::path src;
@@ -70,7 +70,6 @@ bool set(std::string tag){
     std::cout<<"[+] set checkpoint for "<< tag << '\n';
     return true;
 }
-
 bool revert(std::string tag){
     if(manFiles.find(tag)==manFiles.end()){
         std::cout<<"[--] tag not found..\n";
@@ -112,7 +111,23 @@ void deleteTag(std::string tag){
     manFiles.erase(tag);
     std::cout<<"Successfully removed " << tag << '\n';
     saveFiles(); 
+}
 
+void listTags(){
+    for(auto& [tag, e] : manFiles){
+        std::cout<<tag<<'\n';
+    }
+}
+
+void listGroupTags(std::string group){
+    for(auto&  [grp, e] : TagGroups){
+        if(grp==group){
+            for (const auto& tag : e.tags) {
+                std::cout << tag << " ";
+            }
+            std::cout<<'\n';
+        }
+    }
 }
 
 //the 3 functions below are ugly and made to keep the main() clean.
@@ -129,6 +144,9 @@ void assignCmdToEnum(std::string cmd, CMDS* e_){
     else if(cmd=="revg") *e_ = REVG;
     else if(cmd=="setg") *e_ = SETG;
     else if(cmd=="del") *e_ = DEL;
+    else if(cmd=="list") *e_ = LS;
+    else if(cmd=="listg") *e_ = LSG;
+
 
 }
 
@@ -158,6 +176,7 @@ void handleCommands(CMDS* cmds, std::string var1, std::string var2) {
         case ADDG: {
             tag_group t; 
             std::string grp = var1;
+            listTags();
             while (true) {
                 std::cout << "Tag to add: ";
                 std::getline(std::cin, tag);
@@ -224,6 +243,14 @@ void handleCommands(CMDS* cmds, std::string var1, std::string var2) {
         case DEL:
             deleteTag(var1);
             break;
+
+        case LS:
+            listTags();
+            break;
+        
+        case LSG:
+            listGroupTags(var1);
+            break; 
         default:
             break;
     }

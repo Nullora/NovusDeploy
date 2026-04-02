@@ -29,6 +29,10 @@ To add a destination file and assign it to a tag
 ```bash
 ndep add-d ~/destination/folder <yourtag> # "add destination"
 ```
+To delete a tag
+```bash
+ndep del <yourtag> # 'delete'
+```
 To deploy the new source file to all destination files
 ```bash
 ndep dep <yourtag> # "deploy"
