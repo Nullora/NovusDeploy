@@ -49,6 +49,10 @@ To directly deploy your tag to PATH instead of manually adding PATH to your dest
 ```bash
 ndep depp <yourtag> # "deploy path"
 ```
+To list all tags
+```bash
+ndep list
+```
 ## Multi tag / Tag groups (Advanced)
 To make a new group
 ```bash
@@ -73,4 +77,12 @@ ndep revg <groupname> # this reverts the whole group, use with caution
 To deploy all tags in a group to their respective destination folders
 ```bash
 ndep depg <groupname> # this deploys every tag to its corresponding destination
+```
+To list all tags in a specific group
+```bash
+ndep listg <groupname>
+```
+To list all groups
+```bash
+ndep glist 
 ```

@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <filesystem>
 //  initial stuff
-enum CMDS {ADD, ADDD, ADDG, DEP, DEPP, SET, REV, SETG, REVG, DEL, DEPG, LS, LSG};
+enum CMDS {ADD, ADDD, ADDG, DEP, DEPP, SET, REV, SETG, REVG, DEL, DEPG, LS, LSG, DELG, GLS};
 std::string home;
 struct entry{
     std::filesystem::path src;
@@ -113,10 +113,21 @@ void deleteTag(std::string tag){
     saveFiles(); 
 }
 
+void deleteGrp(std::string grp){
+    if(TagGroups.find(grp)==TagGroups.end()){
+        std::cout<<"[--] group not found..\n";
+        return;
+    }
+    TagGroups.erase(grp);
+    std::cout<<"Successfully removed group: " << grp << '\n';
+    saveFiles(); 
+}
+
 void listTags(){
     for(auto& [tag, e] : manFiles){
-        std::cout<<tag<<'\n';
+        std::cout<<tag<<' ';
     }
+    std::cout<<'\n';
 }
 
 void listGroupTags(std::string group){
@@ -127,6 +138,12 @@ void listGroupTags(std::string group){
             }
             std::cout<<'\n';
         }
+    }
+}
+
+void listGroups(){
+    for(auto& [tag, e] : TagGroups){
+        std::cout<<tag<<'\n';
     }
 }
 
@@ -146,6 +163,8 @@ void assignCmdToEnum(std::string cmd, CMDS* e_){
     else if(cmd=="del") *e_ = DEL;
     else if(cmd=="list") *e_ = LS;
     else if(cmd=="listg") *e_ = LSG;
+    else if(cmd=="glist") *e_ = GLS;
+    else if(cmd=="delg") *e_ = DELG;
 
 
 }
@@ -251,6 +270,12 @@ void handleCommands(CMDS* cmds, std::string var1, std::string var2) {
         case LSG:
             listGroupTags(var1);
             break; 
+        case DELG:
+            deleteGrp(var1);
+            break;
+        case GLS:
+            listGroups();
+            break;
         default:
             break;
     }
