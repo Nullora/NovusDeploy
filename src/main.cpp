@@ -130,14 +130,17 @@ void listTags(){
     std::cout<<'\n';
 }
 
-void listGroupTags(std::string group){
-    for(auto&  [grp, e] : TagGroups){
-        if(grp==group){
-            for (const auto& tag : e.tags) {
-                std::cout << tag << " ";
-            }
-            std::cout<<'\n';
+void listGroupTags(const std::string& group) {
+    auto it = TagGroups.find(group);
+    
+    if (it != TagGroups.end()) {
+        std::cout << "Tags in [" << group << "]: ";
+        for (const auto& tag : it->second.tags) {
+            std::cout << tag << " ";
         }
+        std::cout << "\n";
+    } else {
+        std::cout << "[--] Group '" << group << "' not found.\n";
     }
 }
 
